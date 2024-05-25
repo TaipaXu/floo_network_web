@@ -4,12 +4,14 @@
 
 [English](./README.md) | 中文
 
+![](./app.png)
+
 ## 编译
 
 ```sh
 $ git clone https://github.com/TaipaXu/floo_network_web.git
 $ cd floo_network_web
-$ flutter build web --pwa-strategy none
+$ flutter build web --base-href /web/ --web-renderer html --pwa-strategy none
 ```
 
 ## 协议
