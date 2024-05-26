@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:web/web.dart' as web;
 import '/models/file.dart' as model;
 import '/utils/util.dart';
 
 class File extends StatelessWidget {
   final model.File file;
-  const File({Key? key, required this.file}) : super(key: key);
+  final void Function(model.File file)? onDownload;
+  const File({super.key, required this.file, this.onDownload});
 
   @override
   Widget build(BuildContext context) {
@@ -17,8 +17,7 @@ class File extends StatelessWidget {
         trailing: IconButton(
           icon: const Icon(Icons.download),
           onPressed: () {
-            web.window
-                .open('http://localhost:8080/download/${file.id}', '_blank');
+            onDownload?.call(file);
           },
         ),
       ),

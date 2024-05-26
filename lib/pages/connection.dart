@@ -5,8 +5,9 @@ import '/models/file.dart' as model;
 
 class Connection extends StatefulWidget {
   final model.Connection connection;
+  final void Function(model.File file)? onDownload;
 
-  const Connection({super.key, required this.connection});
+  const Connection({super.key, required this.connection, this.onDownload});
 
   @override
   State<Connection> createState() => _ConnectionState();
@@ -27,7 +28,7 @@ class _ConnectionState extends State<Connection> {
         padding: const EdgeInsets.all(16),
         children: [
           for (model.File file in this.widget.connection.files)
-            widget.File(file: file),
+            widget.File(file: file, onDownload: this.widget.onDownload),
         ],
       ),
     );

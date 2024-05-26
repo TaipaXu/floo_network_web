@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:web/web.dart' as web;
 import 'dart:convert';
 import '/models/connection.dart' as model;
 import 'connection.dart' as page;
 import '/models/file.dart' as model;
-import '/apis/base.dart' as api;
+import '/apis/base.dart';
 
 class Home extends StatefulWidget {
-  const Home({Key? key}) : super(key: key);
+  const Home({super.key});
 
   @override
   State<Home> createState() => _HomeState();
@@ -16,6 +17,7 @@ class _HomeState extends State<Home> {
   String? _ip;
   int? _port;
   final List<model.Connection> _connections = [];
+  Api? _api;
 
   Future<void> _showJoinDialog() async {
     String? ip;
@@ -69,7 +71,7 @@ class _HomeState extends State<Home> {
   }
 
   void _start() {
-    api.start(
+    _api = Api(
       ip: _ip!,
       port: _port!,
       onMessage: (String message) {
@@ -99,9 +101,14 @@ class _HomeState extends State<Home> {
             _connections.clear();
             _connections.addAll(connections);
           });
+        } else if (type == 'uploadFileReady') {
+          final String ip = data['ip'];
+          final int port = data['port'];
+          web.window.open('http://$ip:$port/', '_blank');
         }
       },
     );
+    _api?.start();
   }
 
   @override
@@ -134,6 +141,10 @@ class _HomeState extends State<Home> {
             for (final connection in _connections)
               page.Connection(
                 connection: connection,
+                onDownload: (model.File file) {
+                  print('onDownload: $file');
+                  _api?.requestDownloadFile(file);
+                },
               ),
           ],
         ),
