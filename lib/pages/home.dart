@@ -19,55 +19,24 @@ class _HomeState extends State<Home> {
   final List<model.Connection> _connections = [];
   Api? _api;
 
-  Future<void> _showJoinDialog() async {
-    String? ip;
-    int? port;
+  @override
+  void initState() {
+    _getIpAndPortFromUrl();
 
-    final (String inputIp, int inputPort) = await showDialog(
-      context: context,
-      builder: (BuildContext context) => SimpleDialog(
-        title: const Text('Join a channel'),
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                TextField(
-                  decoration: const InputDecoration(
-                    labelText: 'IP address',
-                  ),
-                  onChanged: (String value) {
-                    ip = value;
-                  },
-                ),
-                TextField(
-                  decoration: const InputDecoration(
-                    labelText: 'Port',
-                  ),
-                  onChanged: (String value) {
-                    port = int.tryParse(value);
-                  },
-                ),
-                const SizedBox(height: 20),
-                OutlinedButton(
-                  onPressed: () {
-                    if (ip != null && port != null) {
-                      Navigator.pop(context, (ip, port));
-                    }
-                  },
-                  child: const Text('Join'),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-    print('inputIp: $inputIp, inputPort: $inputPort');
-    _ip = inputIp;
-    _port = inputPort;
+    super.initState();
+  }
 
-    _start();
+  void _getIpAndPortFromUrl() {
+    final Uri uri = Uri.parse(web.window.location.href);
+    final String ip = web.window.location.hostname;
+    final String? port = uri.queryParameters['wsPort'];
+    if (port != null) {
+      setState(() {
+        _ip = ip;
+        _port = int.parse(port);
+      });
+      _start();
+    }
   }
 
   void _start() {
@@ -92,7 +61,6 @@ class _HomeState extends State<Home> {
             }
             connections.add(model.Connection(
               ip: key,
-              port: _port!,
               files: files,
             ));
           }
@@ -118,15 +86,7 @@ class _HomeState extends State<Home> {
       child: Scaffold(
         extendBody: true,
         appBar: AppBar(
-          title: const Text('title'),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.add),
-              onPressed: () {
-                _showJoinDialog();
-              },
-            ),
-          ],
+          title: const Text('Floo Network'),
           bottom: TabBar(
             tabs: <Widget>[
               for (final connection in _connections)
