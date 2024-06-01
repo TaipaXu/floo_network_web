@@ -59,7 +59,7 @@ class _HomeState extends State<Home> {
       setState(() {
         _myFiles.addAll(myFiles);
       });
-      _api?.sendMyFilesInfoToServer(myFiles);
+      _api?.sendMyFilesInfoToServer(_myFiles);
     }
   }
 
