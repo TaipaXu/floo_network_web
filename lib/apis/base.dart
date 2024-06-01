@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import '/models/file.dart' as model;
@@ -61,5 +63,23 @@ class Api {
 
   void _send(String message) {
     channel?.sink.add(message);
+  }
+
+  void uploadFile({required String url, required model.MyFile myFile}) async {
+    Map<String, dynamic> data = {
+      'name': myFile.name,
+      'file': base64Encode(myFile.fileBytes),
+    };
+    String body = json.encode(data);
+    print('body $body');
+
+    final response = await http.post(
+      Uri.parse(url),
+      body: body,
+    );
+    print('response ${response.statusCode}');
+    if (response.statusCode == 200) {
+      print('Uploaded!');
+    }
   }
 }

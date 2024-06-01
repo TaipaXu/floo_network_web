@@ -108,6 +108,20 @@ class _HomeState extends State<Home> {
           final String ip = data['ip'];
           final int port = data['port'];
           web.window.open('http://$ip:$port/', '_blank');
+        } else if (type == 'prepareUpload') {
+          final String fileId = data['id'];
+          String ip = data['ip'];
+          if (ip == 'server') {
+            ip = _ip!;
+          }
+          final int port = data['port'];
+          final model.MyFile? myFile = _myFiles.firstWhere(
+            (element) => element.id == fileId,
+          );
+          print('myFile ${myFile?.id}');
+          if (myFile != null) {
+            _api?.uploadFile(url: 'http://$ip:$port/', myFile: myFile);
+          }
         }
       },
       onDisconnected: () {
