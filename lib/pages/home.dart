@@ -1,9 +1,12 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:web/web.dart' as web;
-import 'dart:convert';
+import 'package:file_picker/file_picker.dart';
 import '/models/connection.dart' as model;
-import 'connection.dart' as page;
+import '/pages/connection.dart' as page;
+import '/pages/myFiles.dart' as page;
 import '/models/file.dart' as model;
+import '/models/myFile.dart' as model;
 import '/apis/base.dart';
 
 class Home extends StatefulWidget {
@@ -16,6 +19,7 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   String? _ip;
   int? _port;
+  final List<model.MyFile> _myFiles = [];
   final List<model.Connection> _connections = [];
   Api? _api;
 
@@ -39,6 +43,33 @@ class _HomeState extends State<Home> {
     }
   }
 
+  void _addMyFiles() async {
+    FilePickerResult? result =
+        await FilePicker.platform.pickFiles(allowMultiple: true);
+    if (result != null) {
+      List<PlatformFile> files = result.files;
+      final List<model.MyFile> myFiles = [];
+      for (final file in files) {
+        myFiles.add(model.MyFile(
+          name: file.name,
+          size: file.size,
+          fileBytes: file.bytes!,
+        ));
+      }
+      setState(() {
+        _myFiles.addAll(myFiles);
+      });
+      _api?.sendMyFilesInfoToServer(myFiles);
+    }
+  }
+
+  void _removeMyFile(model.MyFile file) {
+    setState(() {
+      _myFiles.remove(file);
+    });
+    _api?.sendMyFilesInfoToServer(_myFiles);
+  }
+
   void _start() {
     _api = Api(
       ip: _ip!,
@@ -49,8 +80,12 @@ class _HomeState extends State<Home> {
         final String type = data['type'];
         print('type: $type');
         if (type == 'files') {
+          final String myIp = data['you'];
           List<model.Connection> connections = [];
           for (final key in data['files'].keys) {
+            if (myIp == key) {
+              continue;
+            }
             final List<model.File> files = [];
             for (final file in data['files'][key]) {
               files.add(model.File(
@@ -75,6 +110,12 @@ class _HomeState extends State<Home> {
           web.window.open('http://$ip:$port/', '_blank');
         }
       },
+      onDisconnected: () {
+        print('Disconnected');
+        setState(() {
+          _connections.clear();
+        });
+      },
     );
     _api?.start();
   }
@@ -82,13 +123,22 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: _connections.length,
+      length: _connections.length + 1,
       child: Scaffold(
         extendBody: true,
         appBar: AppBar(
           title: const Text('Floo Network'),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.file_open),
+              onPressed: _addMyFiles,
+            ),
+          ],
           bottom: TabBar(
             tabs: <Widget>[
+              const Tab(
+                text: 'My Files',
+              ),
               for (final connection in _connections)
                 Tab(
                   text: connection.ip,
@@ -98,6 +148,10 @@ class _HomeState extends State<Home> {
         ),
         body: TabBarView(
           children: <Widget>[
+            page.MyFiles(
+              myFiles: _myFiles,
+              onRemove: _removeMyFile,
+            ),
             for (final connection in _connections)
               page.Connection(
                 connection: connection,
