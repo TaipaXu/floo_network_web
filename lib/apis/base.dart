@@ -68,7 +68,7 @@ class Api {
   void uploadFile({required String url, required model.MyFile myFile}) async {
     Map<String, dynamic> data = {
       'name': myFile.name,
-      'file': base64Encode(myFile.fileBytes),
+      'file': base64Encode(myFile.bytes),
     };
     String body = json.encode(data);
     print('body $body');

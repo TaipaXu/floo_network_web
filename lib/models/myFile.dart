@@ -5,11 +5,11 @@ class MyFile {
   final String id = const Uuid().v4();
   final String name;
   final int size;
-  Uint8List fileBytes;
+  Uint8List bytes;
 
   MyFile({
     required this.name,
     required this.size,
-    required this.fileBytes,
+    required this.bytes,
   });
 }

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:web/web.dart' as web;
 import 'package:file_picker/file_picker.dart';
@@ -50,17 +51,37 @@ class _HomeState extends State<Home> {
       List<PlatformFile> files = result.files;
       final List<model.MyFile> myFiles = [];
       for (final file in files) {
-        myFiles.add(model.MyFile(
-          name: file.name,
-          size: file.size,
-          fileBytes: file.bytes!,
-        ));
+        final bool isExist = _myFiles.any((element) =>
+            element.name == file.name &&
+            element.size == file.size &&
+            _areBytesEqual(element.bytes, file.bytes!));
+        if (!isExist) {
+          myFiles.add(model.MyFile(
+            name: file.name,
+            size: file.size,
+            bytes: file.bytes!,
+          ));
+        }
       }
-      setState(() {
-        _myFiles.addAll(myFiles);
-      });
-      _api?.sendMyFilesInfoToServer(_myFiles);
+      if (myFiles.isNotEmpty) {
+        setState(() {
+          _myFiles.addAll(myFiles);
+        });
+        _api?.sendMyFilesInfoToServer(_myFiles);
+      }
     }
+  }
+
+  bool _areBytesEqual(Uint8List a, Uint8List b) {
+    if (a.length != b.length) {
+      return false;
+    }
+    for (int i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) {
+        return false;
+      }
+    }
+    return true;
   }
 
   void _removeMyFile(model.MyFile file) {
