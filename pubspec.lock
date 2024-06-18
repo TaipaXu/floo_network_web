@@ -302,7 +302,7 @@ packages:
     source: hosted
     version: "14.2.1"
   web:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: web
       sha256: "97da13628db363c635202ad97068d47c5b8aa555808e7a9411963c533b449b27"
@@ -333,6 +333,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.5.1"
+  x_responsive:
+    dependency: "direct main"
+    description:
+      name: x_responsive
+      sha256: fc0ff4870030be0975b415c6f20a55f0726027448e948ffb44b3f67329db3ee2
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.0"
 sdks:
   dart: ">=3.4.0 <4.0.0"
   flutter: ">=3.22.0"

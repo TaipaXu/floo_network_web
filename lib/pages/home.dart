@@ -3,9 +3,11 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:web/web.dart' as web;
 import 'package:file_picker/file_picker.dart';
-import '/models/connection.dart' as model;
+import 'package:x_responsive/x_responsive.dart';
 import '/pages/connection.dart' as page;
 import '/pages/myFiles.dart' as page;
+import '/widgets/navbar.dart' as widget;
+import '/models/connection.dart' as model;
 import '/models/file.dart' as model;
 import '/models/myFile.dart' as model;
 import '/apis/base.dart';
@@ -17,7 +19,7 @@ class Home extends StatefulWidget {
   State<Home> createState() => _HomeState();
 }
 
-class _HomeState extends State<Home> {
+class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   String? _ip;
   int? _port;
   final List<model.MyFile> _myFiles = [];
@@ -29,6 +31,13 @@ class _HomeState extends State<Home> {
     _getIpAndPortFromUrl();
 
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _api?.stop();
+
+    super.dispose();
   }
 
   void _getIpAndPortFromUrl() {
@@ -155,48 +164,95 @@ class _HomeState extends State<Home> {
     _api?.start();
   }
 
+  Widget get _connectionsWidgetLeft {
+    return Container();
+  }
+
+  TabBar? get _connectionsWidgetTop {
+    if (Condition.screenUp(Breakpoint.sm).check(context)) {
+      return null;
+    }
+    return TabBar(
+      tabAlignment: TabAlignment.start,
+      isScrollable: true,
+      tabs: <Widget>[
+        const Tab(
+          text: 'My Files',
+        ),
+        for (final connection in _connections)
+          Tab(
+            text: connection.ip,
+          ),
+      ],
+    );
+  }
+
+  Widget _sidebar(BuildContext context) {
+    return Responsive.condition(
+      condition: Condition.screenUp(Breakpoint.sm),
+      child: Container(
+        width: 80,
+        height: double.infinity,
+        color: const Color.fromARGB(31, 70, 70, 70),
+        child: widget.Navbar(
+          connections: _connections,
+          activeIndex: DefaultTabController.of(context).index,
+          onClick: (int index) {
+            DefaultTabController.of(context).animateTo(index);
+          },
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
+      animationDuration: Duration.zero,
       length: _connections.length + 1,
-      child: Scaffold(
-        extendBody: true,
-        appBar: AppBar(
-          title: const Text('Floo Network'),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.file_open),
-              onPressed: _addMyFiles,
-            ),
-          ],
-          bottom: TabBar(
-            tabs: <Widget>[
-              const Tab(
-                text: 'My Files',
-              ),
-              for (final connection in _connections)
-                Tab(
-                  text: connection.ip,
+      child: Builder(
+        builder: (BuildContext context) {
+          DefaultTabController.of(context).addListener(() {
+            setState(() {});
+          });
+          return Scaffold(
+            extendBody: true,
+            appBar: AppBar(
+              title: const Text('Floo Network'),
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.add),
+                  onPressed: _addMyFiles,
                 ),
-            ],
-          ),
-        ),
-        body: TabBarView(
-          children: <Widget>[
-            page.MyFiles(
-              myFiles: _myFiles,
-              onRemove: _removeMyFile,
+              ],
+              bottom: _connectionsWidgetTop,
             ),
-            for (final connection in _connections)
-              page.Connection(
-                connection: connection,
-                onDownload: (model.File file) {
-                  print('onDownload: $file');
-                  _api?.requestDownloadFile(file);
-                },
-              ),
-          ],
-        ),
+            body: Row(
+              children: [
+                _sidebar(context),
+                Expanded(
+                  child: TabBarView(
+                    physics: const NeverScrollableScrollPhysics(),
+                    children: <Widget>[
+                      page.MyFiles(
+                        myFiles: _myFiles,
+                        onRemove: _removeMyFile,
+                      ),
+                      for (final connection in _connections)
+                        page.Connection(
+                          connection: connection,
+                          onDownload: (model.File file) {
+                            print('onDownload: $file');
+                            _api?.requestDownloadFile(file);
+                          },
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }

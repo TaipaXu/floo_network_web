@@ -37,6 +37,10 @@ class Api {
     });
   }
 
+  void stop() {
+    channel?.sink.close();
+  }
+
   void requestDownloadFile(model.File file) {
     final String message = jsonEncode({
       'type': 'downloadFile',

@@ -12,6 +12,7 @@ class File extends StatelessWidget {
     return Card(
       clipBehavior: Clip.antiAlias,
       child: ListTile(
+        contentPadding: const EdgeInsets.all(10),
         title: Text(file.name),
         subtitle: Text(getReadableSize(file.size)),
         trailing: IconButton(
