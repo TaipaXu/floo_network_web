@@ -24,6 +24,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   int? _port;
   final List<model.MyFile> _myFiles = [];
   final List<model.Connection> _connections = [];
+  Map<String, int> requestingFiles = {};
   Api? _api;
 
   @override
@@ -135,11 +136,22 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
             _connections.addAll(connections);
           });
         } else if (type == 'uploadFileReady') {
-          final String ip = data['ip'];
-          final int port = data['port'];
-          web.window.open('http://$ip:$port/', '_blank');
+          String fileId = data['fileId'];
+          if (requestingFiles.containsKey(fileId)) {
+            requestingFiles[fileId] = requestingFiles[fileId]! - 1;
+            if (requestingFiles[fileId] == 0) {
+              requestingFiles.remove(fileId);
+            }
+
+            String ip = data['ip'];
+            if (ip == 'server') {
+              ip = _ip!;
+            }
+            final int port = data['port'];
+            web.window.open('http://$ip:$port/', '_blank');
+          }
         } else if (type == 'prepareUpload') {
-          final String fileId = data['id'];
+          final String fileId = data['fileId'];
           String ip = data['ip'];
           if (ip == 'server') {
             ip = _ip!;
@@ -243,6 +255,12 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                           connection: connection,
                           onDownload: (model.File file) {
                             print('onDownload: $file');
+                            if (requestingFiles.containsKey(file.id)) {
+                              requestingFiles[file.id] =
+                                  requestingFiles[file.id]! + 1;
+                            } else {
+                              requestingFiles[file.id] = 1;
+                            }
                             _api?.requestDownloadFile(file);
                           },
                         ),

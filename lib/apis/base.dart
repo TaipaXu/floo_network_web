@@ -44,7 +44,7 @@ class Api {
   void requestDownloadFile(model.File file) {
     final String message = jsonEncode({
       'type': 'downloadFile',
-      'id': file.id,
+      'fileId': file.id,
     });
     _send(message);
   }
