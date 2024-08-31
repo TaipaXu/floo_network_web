@@ -1,3 +1,7 @@
+# Important Notice
+
+This project has been deprecated, and its functionality has been migrated to a new project: [Floo Network Web](https://github.com/TaipaXu/floo-network-web). Please visit the new project for the latest code and updates.
+
 # Floo Network Web
 
 The web frontend of the [Floo Network Project](https://github.com/TaipaXu/floo-network).

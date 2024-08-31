@@ -1,3 +1,7 @@
+# 重要通知
+
+本项目已废弃，功能迁移至新的项目 [Floo Network Web](https://github.com/TaipaXu/floo-network-web)。请前往新项目获取最新代码和更新。
+
 # 飞路网网页端
 
 [飞路网项目](https://github.com/TaipaXu/floo-network)的网页端。
